@@ -20,10 +20,19 @@ public class DataInitializer implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		if (!appUserRepository.existsByUsername("admin")) {
-			AppUser admin = new AppUser("admin", passwordEncoder.encode("admin123"), AppRole.ADMIN);
-			appUserRepository.save(admin);
-		}
+		appUserRepository.findByUsername("admin").ifPresentOrElse(
+				user -> {
+					if (user.getRole() != AppRole.ADMIN) {
+						user.setRole(AppRole.ADMIN);
+						appUserRepository.save(user);
+						System.out.println("DEBUG: Forced 'admin' user to ADMIN role.");
+					}
+				},
+				() -> {
+					AppUser admin = new AppUser("admin", passwordEncoder.encode("admin123"), AppRole.ADMIN);
+					appUserRepository.save(admin);
+					System.out.println("DEBUG: Created default 'admin' user with ADMIN role.");
+				});
 	}
 }
 

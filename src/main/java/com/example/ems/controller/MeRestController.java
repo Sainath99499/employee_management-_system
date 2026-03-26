@@ -28,6 +28,10 @@ public class MeRestController {
 
         String username = authentication.getName();
         
+        // Detailed logging of all authorities
+        System.out.println("DEBUG: Fetching roles for user: " + username);
+        authentication.getAuthorities().forEach(a -> System.out.println("DEBUG: Found authority: " + a.getAuthority()));
+
         // Extract the role from authorities (looking for ROLE_ADMIN or ROLE_EMPLOYEE)
         String role = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -35,7 +39,7 @@ public class MeRestController {
                 .findFirst()
                 .orElse("ROLE_EMPLOYEE");
 
-        System.out.println("DEBUG: Authenticated user [" + username + "] has assigned role: " + role);
+        System.out.println("DEBUG: Final role assigned: " + role);
 
         Map<String, Object> result = new HashMap<>();
         result.put("username", username);
