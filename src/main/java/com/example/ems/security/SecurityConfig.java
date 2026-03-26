@@ -54,8 +54,8 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		// Allow local React dev server + any Render frontend URL
-		config.setAllowedOriginPatterns(List.of("http://localhost:5173", "https://*.onrender.com"));
+		// Allow local React dev server + any Render/Vercel frontend URL
+		config.setAllowedOriginPatterns(List.of("http://localhost:5173", "https://*.onrender.com", "https://*.vercel.app"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowCredentials(true);
