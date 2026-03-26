@@ -1,13 +1,24 @@
 import axios from 'axios';
 
-const REST_API_BASE_URL = 'http://localhost:8080/api/employees';
+const BASE = 'http://localhost:8080/api/v1/employees';
 
-export const listEmployees = () => axios.get(REST_API_BASE_URL);
+const api = axios.create({
+  baseURL: BASE,
+  withCredentials: true,   // send JSESSIONID cookie
+});
 
-export const createEmployee = (employee) => axios.post(REST_API_BASE_URL, employee);
+export const listEmployees = () => api.get('');
 
-export const getEmployee = (employeeId) => axios.get(REST_API_BASE_URL + '/' + employeeId);
+export const getEmployeesPaginated = (page = 0, size = 10) =>
+  api.get('', { params: { page, size } });
 
-export const updateEmployee = (employeeId, employee) => axios.put(REST_API_BASE_URL + '/' + employeeId, employee);
+export const searchEmployees = (name, department, minSalary, maxSalary) =>
+  api.get('/search', { params: { name, department, minSalary, maxSalary } });
 
-export const deleteEmployee = (employeeId) => axios.delete(REST_API_BASE_URL + '/' + employeeId);
+export const createEmployee = (employee) => api.post('', employee);
+
+export const getEmployee = (employeeId) => api.get(`/${employeeId}`);
+
+export const updateEmployee = (employeeId, employee) => api.put(`/${employeeId}`, employee);
+
+export const deleteEmployee = (employeeId) => api.delete(`/${employeeId}`);

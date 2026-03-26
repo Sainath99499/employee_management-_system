@@ -3,150 +3,127 @@ import { createEmployee, getEmployee, updateEmployee } from '../services/Employe
 import { useNavigate, useParams } from 'react-router-dom';
 
 const EmployeeComponent = () => {
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [errors, setErrors] = useState({ firstName: '', lastName: '', email: '' });
-    
+    const [form, setForm] = useState({
+        firstName: '', lastName: '', email: '',
+        phone: '', address: '', department: '',
+        joiningDate: '', salary: '',
+    });
+    const [errors, setErrors] = useState({});
+
     const navigate = useNavigate();
     const { id } = useParams();
 
     useEffect(() => {
         if (id) {
             getEmployee(id).then((response) => {
-                setFirstName(response.data.firstName);
-                setLastName(response.data.lastName);
-                setEmail(response.data.email);
-            }).catch(error => {
-                console.error(error);
-            });
+                const d = response.data;
+                setForm({
+                    firstName: d.firstName ?? '',
+                    lastName: d.lastName ?? '',
+                    email: d.email ?? '',
+                    phone: d.phone ?? '',
+                    address: d.address ?? '',
+                    department: d.department ?? '',
+                    joiningDate: d.joiningDate ?? '',
+                    salary: d.salary ?? '',
+                });
+            }).catch(console.error);
         }
     }, [id]);
 
-    const handleFirstName = (e) => setFirstName(e.target.value);
-    const handleLastName = (e) => setLastName(e.target.value);
-    const handleEmail = (e) => setEmail(e.target.value);
+    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
     const validateForm = () => {
-        let valid = true;
-        const errorsCopy = { ...errors };
-
-        if (!firstName.trim()) {
-            errorsCopy.firstName = 'First name is required';
-            valid = false;
-        } else {
-            errorsCopy.firstName = '';
+        const errs = {};
+        if (!form.firstName.trim()) errs.firstName = 'First name is required';
+        if (!form.email.trim()) {
+            errs.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+            errs.email = 'Email is invalid';
         }
-
-        if (!lastName.trim()) {
-            errorsCopy.lastName = 'Last name is required';
-            valid = false;
-        } else {
-            errorsCopy.lastName = '';
-        }
-
-        if (!email.trim()) {
-            errorsCopy.email = 'Email is required';
-            valid = false;
-        } else if (!/\S+@\S+\.\S+/.test(email)) {
-            errorsCopy.email = 'Email is invalid';
-            valid = false;
-        } else {
-            errorsCopy.email = '';
-        }
-
-        setErrors(errorsCopy);
-        return valid;
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
     };
 
     const saveOrUpdateEmployee = (e) => {
         e.preventDefault();
-        
-        if (validateForm()) {
-            const employee = { firstName, lastName, email };
-            
-            if (id) {
-                updateEmployee(id, employee).then((response) => {
-                    navigate('/employees');
-                }).catch(error => {
-                    console.error(error);
-                });
-            } else {
-                createEmployee(employee).then((response) => {
-                    navigate('/employees');
-                }).catch(error => {
-                    console.error(error);
-                });
-            }
+        if (!validateForm()) return;
+
+        const employee = {
+            ...form,
+            salary: form.salary !== '' ? parseFloat(form.salary) : null,
+            joiningDate: form.joiningDate || null,
+        };
+
+        if (id) {
+            updateEmployee(id, employee).then(() => navigate('/employees')).catch(console.error);
+        } else {
+            createEmployee(employee).then(() => navigate('/employees')).catch(console.error);
         }
     };
 
-    const pageTitle = () => {
-        if (id) {
-            return <h2>Update Employee</h2>;
-        } else {
-            return <h2>Add Employee</h2>;
-        }
-    };
+    const field = (label, name, type = 'text', placeholder = '') => (
+        <div className="form-group">
+            <label className="form-label">{label}</label>
+            <input
+                type={type}
+                name={name}
+                placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+                value={form[name]}
+                className="form-control"
+                onChange={handleChange}
+                style={errors[name] ? { borderColor: 'var(--danger)' } : {}}
+            />
+            {errors[name] && (
+                <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem' }}>
+                    {errors[name]}
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <div className="animate-fade-in" style={{ display: 'flex', justifyContent: 'center' }}>
-            <div className="card" style={{ maxWidth: '500px', width: '100%' }}>
+            <div className="card" style={{ maxWidth: '600px', width: '100%' }}>
                 <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                    {pageTitle()}
+                    <h2>{id ? 'Update Employee' : 'Add Employee'}</h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                         {id ? 'Update the details for this employee' : 'Enter the details to create a new employee record'}
                     </p>
                 </div>
-                
-                <form>
-                    <div className="form-group">
-                        <label className="form-label">First Name</label>
-                        <input
-                            type="text"
-                            placeholder="Enter first name"
-                            name="firstName"
-                            value={firstName}
-                            className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
-                            onChange={handleFirstName}
-                            style={errors.firstName ? { borderColor: 'var(--danger)' } : {}}
-                        />
-                        {errors.firstName && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem' }}>{errors.firstName}</div>}
+
+                <form onSubmit={saveOrUpdateEmployee}>
+                    {/* Name row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        {field('First Name', 'firstName')}
+                        {field('Last Name', 'lastName')}
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Last Name</label>
-                        <input
-                            type="text"
-                            placeholder="Enter last name"
-                            name="lastName"
-                            value={lastName}
-                            className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
-                            onChange={handleLastName}
-                            style={errors.lastName ? { borderColor: 'var(--danger)' } : {}}
-                        />
-                        {errors.lastName && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem' }}>{errors.lastName}</div>}
+                    {/* Contact row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        {field('Email Address', 'email', 'email')}
+                        {field('Phone', 'phone', 'tel')}
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Email Address</label>
-                        <input
-                            type="email"
-                            placeholder="Enter email address"
-                            name="email"
-                            value={email}
-                            className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                            onChange={handleEmail}
-                            style={errors.email ? { borderColor: 'var(--danger)' } : {}}
-                        />
-                        {errors.email && <div style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem' }}>{errors.email}</div>}
+                    {field('Address', 'address', 'text', 'Street, City, State')}
+
+                    {/* Employment row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                        {field('Department', 'department', 'text', 'e.g. HR, IT')}
+                        {field('Joining Date', 'joiningDate', 'date')}
+                        {field('Salary (₹)', 'salary', 'number')}
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                        <button className="btn btn-primary" onClick={saveOrUpdateEmployee} style={{ flex: 1 }}>
-                            Submit
+                        <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                            {id ? 'Update Employee' : 'Add Employee'}
                         </button>
-                        <button className="btn btn-secondary" onClick={(e) => { e.preventDefault(); navigate('/employees'); }} style={{ flex: 1 }}>
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => navigate('/employees')}
+                            style={{ flex: 1 }}
+                        >
                             Cancel
                         </button>
                     </div>
