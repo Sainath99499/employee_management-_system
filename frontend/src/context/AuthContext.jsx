@@ -9,8 +9,14 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     getCurrentUser()
-      .then(res => setUser(res.data))
-      .catch(() => setUser(null))
+      .then(res => {
+        console.log('DEBUG: Fetched user data:', res.data);
+        setUser(res.data);
+      })
+      .catch((err) => {
+        console.warn('DEBUG: No active session found:', err.response?.status);
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 

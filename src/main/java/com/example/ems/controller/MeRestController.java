@@ -27,14 +27,19 @@ public class MeRestController {
         }
 
         String username = authentication.getName();
+        
+        // Extract the role from authorities (looking for ROLE_ADMIN or ROLE_EMPLOYEE)
         String role = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
+                .filter(auth -> auth.startsWith("ROLE_"))
                 .findFirst()
                 .orElse("ROLE_EMPLOYEE");
 
+        System.out.println("DEBUG: Authenticated user [" + username + "] has assigned role: " + role);
+
         Map<String, Object> result = new HashMap<>();
         result.put("username", username);
-        result.put("role", role); // e.g. ROLE_ADMIN or ROLE_EMPLOYEE
+        result.put("role", role); 
 
         // If employee role, include their employee ID so frontend can redirect to profile
         if ("ROLE_EMPLOYEE".equals(role)) {
