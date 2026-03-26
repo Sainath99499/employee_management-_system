@@ -1,0 +1,45 @@
+services:
+  # 1. PostgreSQL Database
+  - type: pgo
+    name: ems-db
+    plan: free
+
+  # 2. Spring Boot Backend
+  - type: web
+    name: ems-backend
+    env: docker
+    plan: free
+    dockerCommand: ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: ems-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: ems-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: ems-db
+          property: password
+
+  # 3. React Frontend
+  - type: web
+    name: ems-frontend
+    env: static
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: ems-backend
+          envVarKey: RENDER_EXTERNAL_URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
