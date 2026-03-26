@@ -39,12 +39,25 @@ public class SecurityConfig {
 						.requestMatchers("/employees/me").hasAnyRole("ADMIN", "EMPLOYEE")
 						.anyRequest().authenticated())
 				.formLogin(form -> form
-						.loginPage("/login")
-						.successHandler(new RoleBasedAuthenticationSuccessHandler())
+						.loginProcessingUrl("/login")
+						.successHandler((request, response, authentication) -> {
+							response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_OK);
+							response.setContentType("application/json");
+							response.getWriter().write("{\"success\":true}");
+						})
+						.failureHandler((request, response, exception) -> {
+							response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+							response.setContentType("application/json");
+							response.getWriter().write("{\"error\":\"Invalid username or password\"}");
+						})
 						.permitAll())
 				.logout(logout -> logout
-						.logoutSuccessUrl("/login?logout")
 						.logoutUrl("/logout")
+						.logoutSuccessHandler((request, response, authentication) -> {
+							response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_OK);
+							response.setContentType("application/json");
+							response.getWriter().write("{\"success\":true}");
+						})
 						.permitAll())
 				.httpBasic(Customizer.withDefaults());
 
