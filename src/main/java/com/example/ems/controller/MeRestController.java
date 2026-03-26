@@ -1,6 +1,7 @@
 package com.example.ems.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +33,19 @@ public class MeRestController {
         System.out.println("DEBUG: Fetching roles for user: " + username);
         authentication.getAuthorities().forEach(a -> System.out.println("DEBUG: Found authority: " + a.getAuthority()));
 
-        // Extract the role from authorities (looking for ROLE_ADMIN or ROLE_EMPLOYEE)
-        String role = authentication.getAuthorities().stream()
+        // Extract the role from authorities (prioritizing ROLE_ADMIN)
+        List<String> authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .filter(auth -> auth.startsWith("ROLE_"))
-                .findFirst()
-                .orElse("ROLE_EMPLOYEE");
+                .toList();
+        
+        String role = "ROLE_EMPLOYEE";
+        if (authorities.contains("ROLE_ADMIN") || authorities.contains("ADMIN")) {
+            role = "ROLE_ADMIN";
+        } else if (authorities.contains("ROLE_EMPLOYEE") || authorities.contains("EMPLOYEE")) {
+            role = "ROLE_EMPLOYEE";
+        } else if (!authorities.isEmpty()) {
+            role = authorities.get(0);
+        }
 
         System.out.println("DEBUG: Final role assigned: " + role);
 

@@ -20,12 +20,21 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  const isAdmin = () => user?.role === 'ROLE_ADMIN';
+  const isAdmin = () => {
+    const role = user?.role;
+    return role === 'ROLE_ADMIN' || role === 'ADMIN';
+  };
 
   const refreshUser = () => {
     return getCurrentUser()
-      .then(res => setUser(res.data))
-      .catch(() => setUser(null));
+      .then(res => {
+        console.log('DEBUG: refreshUser - Fetched user data:', res.data);
+        setUser(res.data);
+      })
+      .catch((err) => {
+        console.warn('DEBUG: refreshUser - Failed to fetch user:', err.response?.status);
+        setUser(null);
+      });
   };
 
   const clearUser = () => setUser(null);

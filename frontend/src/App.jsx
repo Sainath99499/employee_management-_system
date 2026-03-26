@@ -13,7 +13,16 @@ import DashboardComponent from './components/DashboardComponent';
 import AttendanceComponent from './components/AttendanceComponent';
 
 const RootRedirect = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+        <div className="spinner" />
+      </div>
+    );
+  }
+
   if (user && isAdmin()) {
     return <Navigate to="/dashboard" replace />;
   }
