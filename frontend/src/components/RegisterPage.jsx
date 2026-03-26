@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../services/AuthService';
 
 const RegisterPage = () => {
-  const [form, setForm] = useState({ username: '', password: '', confirmPassword: '' });
+  const [form, setForm] = useState({ username: '', password: '', confirmPassword: '', role: 'EMPLOYEE' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ const RegisterPage = () => {
     setError('');
     setLoading(true);
     try {
-      await register(form.username, form.password, form.confirmPassword);
+      await register(form.username, form.password, form.confirmPassword, form.role);
       setSuccess(true);
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
@@ -77,6 +77,18 @@ const RegisterPage = () => {
               placeholder="Repeat password"
               required
             />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Role</label>
+            <select
+              name="role"
+              className="form-control"
+              value={form.role}
+              onChange={handleChange}
+            >
+              <option value="EMPLOYEE">Employee</option>
+              <option value="ADMIN">Admin</option>
+            </select>
           </div>
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
             {loading ? 'Registering...' : 'Register'}

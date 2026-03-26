@@ -18,7 +18,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public AppUser registerEmployeeUser(String username, String rawPassword) {
+	public AppUser registerUser(String username, String rawPassword, String role) {
 		String normalized = username == null ? null : username.trim().toLowerCase();
 		if (normalized == null || normalized.isBlank()) {
 			throw new IllegalArgumentException("Username is required");
@@ -33,7 +33,13 @@ public class UserServiceImpl implements UserService {
 		AppUser user = new AppUser();
 		user.setUsername(normalized);
 		user.setPasswordHash(passwordEncoder.encode(rawPassword));
-		user.setRole(AppRole.EMPLOYEE);
+		
+		AppRole appRole = AppRole.EMPLOYEE;
+		if ("ADMIN".equalsIgnoreCase(role)) {
+			appRole = AppRole.ADMIN;
+		}
+		user.setRole(appRole);
+		
 		return appUserRepository.save(user);
 	}
 }

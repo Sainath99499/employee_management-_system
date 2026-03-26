@@ -20,14 +20,15 @@ public class AuthRestController {
     public ResponseEntity<?> register(
             @RequestParam String username,
             @RequestParam String password,
-            @RequestParam String confirmPassword) {
+            @RequestParam String confirmPassword,
+            @RequestParam(required = false) String role) {
         
         if (password == null || !password.equals(confirmPassword)) {
             return ResponseEntity.badRequest().body("Passwords do not match");
         }
 
         try {
-            userService.registerEmployeeUser(username, password);
+            userService.registerUser(username, password, role);
             return ResponseEntity.ok().body("User registered successfully");
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
