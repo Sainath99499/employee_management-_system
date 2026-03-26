@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Employee Profile - EMS</title>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+	<div class="container my-4">
+			<div class="d-flex justify-content-between align-items-center mb-3">
+			<div>
+				<h2 class="page-title mb-0">Employee profile</h2>
+				<div class="muted small">ID: <span th:text="${employee.id}"></span></div>
+			</div>
+			<div class="d-flex gap-2">
+				<a th:href="@{/}" class="btn btn-outline-secondary btn-sm" sec:authorize="hasRole('ADMIN')">Back to list</a>
+				<a th:href="@{/employees/me}" class="btn btn-outline-secondary btn-sm" sec:authorize="hasRole('EMPLOYEE')">Back to my profile</a>
+				<a th:href="@{/employees/{id}/attendance(id=${employee.id})}" class="btn btn-outline-primary btn-sm">Attendance</a>
+				<a th:href="@{/showFormForUpdate/{id}(id=${employee.id})}" class="btn btn-primary btn-sm" sec:authorize="hasRole('ADMIN')">Edit</a>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-3 text-center mb-3">
+				<img th:if="${employee.profileImage != null}" th:src="${employee.profileImage}"
+					class="img-thumbnail mb-2" alt="Profile image" style="width: 160px; height: 160px; object-fit: cover; border-radius: 999px;" />
+				<div th:if="${employee.profileImage == null}" class="border rounded-circle d-inline-flex align-items-center justify-content-center"
+					style="width: 120px; height: 120px; font-size: 32px;">
+					<span th:text="${#strings.toUpperCase(employee.firstName.substring(0,1))}"></span>
+				</div>
+				<h4 class="mt-2" th:text="${employee.firstName + ' ' + employee.lastName}"></h4>
+				<p class="muted mb-0" th:text="${employee.department != null ? employee.department : 'Unassigned'}">Department</p>
+			</div>
+
+			<div class="col-md-9">
+				<div class="card mb-3">
+					<div class="card-body">
+						<div class="fw-semibold mb-2">Contact</div>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="muted small">Email</div>
+								<div th:text="${employee.email}"></div>
+							</div>
+							<div class="col-md-6">
+								<div class="muted small">Phone</div>
+								<div th:text="${employee.phone}"></div>
+							</div>
+							<div class="col-12 mt-3">
+								<div class="muted small">Address</div>
+								<div th:text="${employee.address}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="card mb-3">
+					<div class="card-body">
+						<div class="fw-semibold mb-2">Employment</div>
+						<div class="row">
+							<div class="col-md-4">
+								<div class="muted small">Department</div>
+								<div th:text="${employee.department}"></div>
+							</div>
+							<div class="col-md-4">
+								<div class="muted small">Joining date</div>
+								<div th:text="${employee.joiningDate}"></div>
+							</div>
+							<div class="col-md-4">
+								<div class="muted small">Salary</div>
+								<div th:text="${employee.salary}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
