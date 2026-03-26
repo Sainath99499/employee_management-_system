@@ -26,7 +26,7 @@ public class SecurityConfig {
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+						.requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**", "/api/v1/auth/**").permitAll()
 						// Authenticated users (ADMIN or EMPLOYEE) can access /me and attendance
 						.requestMatchers("/api/v1/me").authenticated()
 						.requestMatchers("/api/v1/employees/*/attendance").authenticated()

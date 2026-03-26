@@ -23,7 +23,7 @@ export const register = (username, password, confirmPassword) => {
   params.append('username', username);
   params.append('password', password);
   params.append('confirmPassword', confirmPassword);
-  return api.post('/register', params, {
+  return api.post('/api/v1/auth/register', params, {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   });
 };
