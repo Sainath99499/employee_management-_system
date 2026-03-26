@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import HeaderComponent from './components/HeaderComponent';
 import FooterComponent from './components/FooterComponent';
@@ -11,6 +11,14 @@ import EmployeeComponent from './components/EmployeeComponent';
 import EmployeeProfileComponent from './components/EmployeeProfileComponent';
 import DashboardComponent from './components/DashboardComponent';
 import AttendanceComponent from './components/AttendanceComponent';
+
+const RootRedirect = () => {
+  const { user, isAdmin } = useAuth();
+  if (user && isAdmin()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Navigate to="/employees" replace />;
+};
 
 function App() {
   return (
@@ -28,7 +36,7 @@ function App() {
                 <HeaderComponent />
                 <main className="main-content">
                   <Routes>
-                    <Route path="/" element={<Navigate to="/employees" replace />} />
+                    <Route path="/" element={<RootRedirect />} />
                     <Route path="/employees" element={<ListEmployeeComponent />} />
                     <Route path="/employees/:id" element={<EmployeeProfileComponent />} />
                     <Route path="/employees/:id/attendance" element={<AttendanceComponent />} />
