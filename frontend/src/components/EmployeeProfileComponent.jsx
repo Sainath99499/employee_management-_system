@@ -52,7 +52,7 @@ const EmployeeProfileComponent = () => {
         <div style={{ textAlign: 'center' }}>
           {employee.profileImage ? (
             <img
-              src={`http://localhost:8080/${employee.profileImage}`}
+              src={`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/${employee.profileImage}`}
               alt="Profile"
               style={{ width: '130px', height: '130px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--border-color)' }}
             />

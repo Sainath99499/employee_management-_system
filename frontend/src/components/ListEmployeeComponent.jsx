@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { listEmployees, searchEmployees, deleteEmployee } from '../services/EmployeeService';
+import { getEmployeesPaginated, searchEmployees, deleteEmployee } from '../services/EmployeeService';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -21,7 +21,7 @@ const ListEmployeeComponent = () => {
     }, [currentPage, isSearching]);
 
     const loadPage = (page) => {
-        listEmployees().then(res => {
+        getEmployeesPaginated(page).then(res => {
             // The API returns a Page object
             const data = res.data;
             if (data && data.content) {
