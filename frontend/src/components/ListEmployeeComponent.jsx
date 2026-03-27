@@ -6,24 +6,47 @@ import { useAuth } from '../context/AuthContext';
 const ListEmployeeComponent = () => {
     const [employees, setEmployees] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [search, setSearch] = useState({ name: '', department: '', minSalary: '', maxSalary: '' });
     const [isSearching, setIsSearching] = useState(false);
+    
     const navigate = useNavigate();
     const { isAdmin } = useAuth();
+
+    const loadAllEmployees = () => {
+        setLoading(true);
+        setError(null);
+        console.log('DEBUG: Fetching all employees...');
+        listEmployees().then(res => {
+            const data = res.data;
+            console.log('DEBUG: Received employee data:', data);
+            
+            if (Array.isArray(data)) {
+                setEmployees(data);
+                setTotalItems(data.length);
+            } else if (data && data.content && Array.isArray(data.content)) {
+                // Secondary check in case backend is still paginated
+                setEmployees(data.content);
+                setTotalItems(data.totalElements || data.content.length);
+            } else {
+                console.error('DEBUG: Data is not an array:', data);
+                setEmployees([]);
+                setTotalItems(0);
+            }
+        }).catch(err => {
+            console.error('DEBUG: Failed to load employees:', err);
+            setError('Failed to connect to the server. Please check your connection.');
+        }).finally(() => {
+            setLoading(false);
+        });
+    };
 
     useEffect(() => {
         if (!isSearching) {
             loadAllEmployees();
         }
     }, [isSearching]);
-
-    const loadAllEmployees = () => {
-        listEmployees().then(res => {
-            const data = res.data;
-            setEmployees(data);
-            setTotalItems(data.length);
-        }).catch(console.error);
-    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -35,10 +58,23 @@ const ListEmployeeComponent = () => {
             return;
         }
         setIsSearching(true);
+        setLoading(true);
+        console.log('DEBUG: Searching employees with filters:', search);
         searchEmployees(name, department, minSalary || null, maxSalary || null).then(res => {
-            setEmployees(res.data);
-            setTotalItems(res.data.length);
-        }).catch(console.error);
+            const data = res.data;
+            if (Array.isArray(data)) {
+                setEmployees(data);
+                setTotalItems(data.length);
+            } else {
+                setEmployees([]);
+                setTotalItems(0);
+            }
+        }).catch(err => {
+            console.error('DEBUG: Search failed:', err);
+            setError('Search failed. Please try again.');
+        }).finally(() => {
+            setLoading(false);
+        });
     };
 
     const handleClear = () => {
@@ -63,6 +99,24 @@ const ListEmployeeComponent = () => {
         for (let c of dept) hash = c.charCodeAt(0) + ((hash << 5) - hash);
         return colors[Math.abs(hash) % colors.length];
     };
+
+    if (loading && employees.length === 0) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
+                <div className="spinner" style={{ marginBottom: '1rem' }} />
+                <p className="text-muted">Loading employees...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="card text-center" style={{ padding: '3rem' }}>
+                <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>{error}</div>
+                <button className="btn btn-primary" onClick={loadAllEmployees}>Try Again</button>
+            </div>
+        );
+    }
 
     return (
         <div className="animate-fade-in">
@@ -104,7 +158,7 @@ const ListEmployeeComponent = () => {
                                 value={search.maxSalary} onChange={e => setSearch({ ...search, maxSalary: e.target.value })} />
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button type="submit" className="btn btn-primary">Search</button>
+                            <button type="submit" className="btn btn-primary" disabled={loading}>Search</button>
                             <button type="button" className="btn btn-secondary" onClick={handleClear}>Clear</button>
                         </div>
                     </form>
@@ -174,8 +228,6 @@ const ListEmployeeComponent = () => {
                         </tbody>
                     </table>
                 </div>
-
-
             </div>
         </div>
     );
