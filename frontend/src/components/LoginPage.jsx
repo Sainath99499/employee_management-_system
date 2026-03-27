@@ -61,14 +61,34 @@ const LoginPage = () => {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.8rem', fontSize: '1rem' }} disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
           </button>
-        </form>
 
-        <p className="auth-footer">
-          Don't have an account? <Link to="/register">Register</Link>
-        </p>
+          <div style={{ marginTop: '1.5rem', textAlign: 'center', borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
+              <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.8rem' }}>Need admin access?</p>
+              <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ width: '100%', background: '#f8f9fa', color: '#333', border: '1px solid #ddd' }}
+                  onClick={() => {
+                      setUsername('ems_admin');
+                      setPassword('Admin@EMS2026');
+                      // Give state a chance to update before submitting
+                      setTimeout(() => {
+                          const form = document.querySelector('form');
+                          if (form) form.requestSubmit();
+                      }, 100);
+                  }}
+              >
+                  Log in as System Admin
+              </button>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              Don't have an account? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>Register</Link>
+          </div>
+        </form>
       </div>
     </div>
   );

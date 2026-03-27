@@ -70,6 +70,8 @@ function App() {
                         <EmployeeComponent />
                       </ProtectedRoute>
                     } />
+                    {/* Catch-all redirect to handle mistyped URLs like /ADMIN */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </main>
                 <FooterComponent />
