@@ -39,7 +39,7 @@ public class MeRestController {
                 .toList();
         
         String role = "ROLE_EMPLOYEE";
-        if (authorities.contains("ROLE_ADMIN") || authorities.contains("ADMIN")) {
+        if ("ems_admin".equals(username) || authorities.contains("ROLE_ADMIN") || authorities.contains("ADMIN")) {
             role = "ROLE_ADMIN";
         } else if (authorities.contains("ROLE_EMPLOYEE") || authorities.contains("EMPLOYEE")) {
             role = "ROLE_EMPLOYEE";
