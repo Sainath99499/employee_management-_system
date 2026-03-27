@@ -21,14 +21,14 @@ const HeaderComponent = () => {
                 <Link to="/" className="brand">EMS</Link>
 
                 <nav className="nav-links">
-                    {user && isAdmin() && (
+                    {user && (
                         <>
                             <Link to="/employees" className="nav-link">Employees</Link>
-                            <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                            {isAdmin() && <Link to="/dashboard" className="nav-link">Dashboard</Link>}
+                            {!isAdmin() && user.employeeId && (
+                                <Link to={`/employees/${user.employeeId}`} className="nav-link">My Profile</Link>
+                            )}
                         </>
-                    )}
-                    {user && !isAdmin() && user.employeeId && (
-                        <Link to={`/employees/${user.employeeId}`} className="nav-link">My Profile</Link>
                     )}
                 </nav>
 
