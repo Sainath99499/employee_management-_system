@@ -27,16 +27,17 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**", "/api/v1/auth/**").permitAll()
-						// Authenticated users (ADMIN or EMPLOYEE) can access /me and attendance
+						// Profile and list access for all authenticated users
 						.requestMatchers("/api/v1/me").authenticated()
+						.requestMatchers("/api/v1/employees", "/api/v1/employees/search", "/api/v1/employees/{id}").authenticated()
 						.requestMatchers("/api/v1/employees/*/attendance").authenticated()
-						// Dashboard stats require ADMIN
+						// Dashboard and management actions REQUIRE admin
 						.requestMatchers("/api/v1/dashboard").hasRole("ADMIN")
-						// All other /api/** requires ADMIN
+						.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/employees").hasRole("ADMIN")
+						.requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/v1/employees/**").hasRole("ADMIN")
+						.requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v1/employees/**").hasRole("ADMIN")
+						// Legacy and other API protection
 						.requestMatchers("/api/**").hasRole("ADMIN")
-						.requestMatchers("/", "/page/**", "/search", "/dashboard").hasRole("ADMIN")
-						.requestMatchers("/showNewEmployeeForm", "/saveEmployee", "/showFormForUpdate/**", "/deleteEmployee/**").hasRole("ADMIN")
-						.requestMatchers("/employees/me").hasAnyRole("ADMIN", "EMPLOYEE")
 						.anyRequest().authenticated())
 				.formLogin(form -> form
 						.loginProcessingUrl("/login")
