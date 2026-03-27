@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getEmployeesPaginated, searchEmployees, deleteEmployee } from '../services/EmployeeService';
+import { listEmployees, searchEmployees, deleteEmployee } from '../services/EmployeeService';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,32 +7,21 @@ const ListEmployeeComponent = () => {
     const [employees, setEmployees] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [search, setSearch] = useState({ name: '', department: '', minSalary: '', maxSalary: '' });
-    const [currentPage, setCurrentPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
     const [isSearching, setIsSearching] = useState(false);
-    const pageSize = 10;
     const navigate = useNavigate();
     const { isAdmin } = useAuth();
 
     useEffect(() => {
         if (!isSearching) {
-            loadPage(currentPage);
+            loadAllEmployees();
         }
-    }, [currentPage, isSearching]);
+    }, [isSearching]);
 
-    const loadPage = (page) => {
-        getEmployeesPaginated(page).then(res => {
-            // The API returns a Page object
+    const loadAllEmployees = () => {
+        listEmployees().then(res => {
             const data = res.data;
-            if (data && data.content) {
-                setEmployees(data.content);
-                setTotalPages(data.totalPages);
-                setTotalItems(data.totalElements);
-            } else if (Array.isArray(data)) {
-                setEmployees(data);
-                setTotalItems(data.length);
-                setTotalPages(1);
-            }
+            setEmployees(data);
+            setTotalItems(data.length);
         }).catch(console.error);
     };
 
@@ -42,30 +31,27 @@ const ListEmployeeComponent = () => {
         const hasFilter = name || department || minSalary || maxSalary;
         if (!hasFilter) {
             setIsSearching(false);
-            setCurrentPage(0);
-            loadPage(0);
+            loadAllEmployees();
             return;
         }
         setIsSearching(true);
         searchEmployees(name, department, minSalary || null, maxSalary || null).then(res => {
             setEmployees(res.data);
             setTotalItems(res.data.length);
-            setTotalPages(1);
         }).catch(console.error);
     };
 
     const handleClear = () => {
         setSearch({ name: '', department: '', minSalary: '', maxSalary: '' });
         setIsSearching(false);
-        setCurrentPage(0);
-        loadPage(0);
+        loadAllEmployees();
     };
 
     const removeEmployee = (id) => {
         if (window.confirm('Are you sure you want to delete this employee?')) {
             deleteEmployee(id).then(() => {
                 setIsSearching(false);
-                loadPage(currentPage);
+                loadAllEmployees();
             }).catch(console.error);
         }
     };
@@ -189,24 +175,7 @@ const ListEmployeeComponent = () => {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && !isSearching && (
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', padding: '1rem' }}>
-                        <button className="btn btn-secondary" onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 0} style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}>
-                            Previous
-                        </button>
-                        {Array.from({ length: totalPages }, (_, i) => (
-                            <button key={i} onClick={() => setCurrentPage(i)}
-                                className={`btn ${i === currentPage ? 'btn-primary' : 'btn-secondary'}`}
-                                style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}>
-                                {i + 1}
-                            </button>
-                        ))}
-                        <button className="btn btn-secondary" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === totalPages - 1} style={{ padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}>
-                            Next
-                        </button>
-                    </div>
-                )}
+
             </div>
         </div>
     );
