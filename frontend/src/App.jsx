@@ -23,7 +23,11 @@ const RootRedirect = () => {
     );
   }
 
-  if (user && isAdmin()) {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (isAdmin()) {
     return <Navigate to="/dashboard" replace />;
   }
   return <Navigate to="/employees" replace />;
